@@ -18,6 +18,14 @@ def run():
     )
     apple_prices_figure.show()
 
+    returns = (
+        prices.sort_values("date")
+        .assign(ret=lambda x: x["adjusted_close"].pct_change())
+        .loc[:, ["symbol", "date", "ret"]]
+    )
+    returns = returns.dropna()
+    print(returns)
+
 
 if __name__ == "__main__":
     run()
