@@ -22,4 +22,4 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [project.scripts]
-chapter1 = "tidy_finance.ch01_working_with_stock_returns:run"
+chapter1_1 = "tidy_finance.ch1_1_working_with_stock_returns:run"
