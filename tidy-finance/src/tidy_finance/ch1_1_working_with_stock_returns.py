@@ -1,4 +1,6 @@
+import pandas as pd
 import tidyfinance as tf
+from mizani.formatters import percent_format
 from plotnine import *  # type: ignore
 
 
@@ -25,6 +27,22 @@ def run():
     )
     returns = returns.dropna()
     print(returns)
+
+    print("Summary statistics for Apple stock returns:")
+    print(pd.DataFrame(returns["ret"].describe()).round(3).T)
+
+    print("Yearly summary statistics for Apple stock returns:")
+    print((returns["ret"].groupby(returns["date"].dt.year).describe().round(3)))
+
+    quantile_05 = returns["ret"].quantile(0.05)
+    apple_returns_figure = (
+        ggplot(returns, mapping=aes(x="ret"))
+        + geom_histogram(bins=100)
+        + geom_vline(aes(xintercept=quantile_05), linetype="dashed")
+        + labs(x="", y="", title="Distribution of daily Apple stock returns")
+        + scale_x_continuous(labels=percent_format())
+    )
+    apple_returns_figure.show()
 
 
 if __name__ == "__main__":
