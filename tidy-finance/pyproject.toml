@@ -1,13 +1,25 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "tidy-finance"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "ipykernel>=7.1.0",
     "jupyterlab>=4.5.1",
     "numpy>=2.4.0",
     "pandas>=2.3.3",
+    "plotnine>=0.15.2",
     "tidyfinance>=0.2.5",
 ]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+chapter1 = "tidy_finance.ch01_working_with_stock_returns:run"
