@@ -44,6 +44,34 @@ def run():
     )
     apple_returns_figure.show()
 
+    symbols = tf.download_data(
+        domain="constituents", index="Dow Jones Industrial Average"
+    )
+    prices_daily = tf.download_data(
+        domain="stock_prices",
+        symbols=symbols["symbol"].tolist(),
+        start_date="2000-01-01",
+        end_date="2023-12-31",
+    )
+
+    prices_figure = (
+        ggplot(prices_daily, aes(y="adjusted_close", x="date", color="symbol"))
+        + geom_line()
+        + scale_x_datetime(date_breaks="5 years", date_labels="%Y")
+        + labs(x="", y="", color="", title="Stock prices of DOW index constituents")
+        + theme(legend_position="none")
+    )
+    prices_figure.show()
+
+    returns_daily = (
+        prices_daily.assign(
+            ret=lambda x: x.groupby("symbol")["adjusted_close"].pct_change()
+        )
+        .get(["symbol", "date", "ret"])
+        .dropna(subset="ret")
+    )
+    print(returns_daily.groupby("symbol")["ret"].describe().round(3))
+
 
 if __name__ == "__main__":
     run()
