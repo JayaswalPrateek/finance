@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import tidyfinance as tf
 from mizani.formatters import percent_format
@@ -71,6 +72,34 @@ def run():
         .dropna(subset="ret")
     )
     print(returns_daily.groupby("symbol")["ret"].describe().round(3))
+
+    returns_monthly = (
+        returns_daily.assign(
+            date=returns_daily["date"].dt.to_period("M").dt.to_timestamp()
+        )
+        .groupby(["symbol", "date"], as_index=False)
+        .agg(ret=("ret", lambda x: np.prod(1 + x) - 1))
+    )
+    apple_daily = returns_daily.query("symbol == 'AAPL'").assign(frequency="Daily")
+    apple_monthly = returns_monthly.query("symbol == 'AAPL'").assign(
+        frequency="Monthly"
+    )
+    apple_returns = pd.concat([apple_daily, apple_monthly], ignore_index=True)
+
+    apple_returns_figure = (
+        ggplot(apple_returns, aes(x="ret", fill="frequency"))
+        + geom_histogram(position="identity", bins=50)
+        + labs(
+            x="",
+            y="",
+            fill="Frequency",
+            title="Distribution of Apple returns across different frequencies",
+        )
+        + scale_x_continuous(labels=percent_format())
+        + facet_wrap("frequency", scales="free")
+        + theme(legend_position="none")
+    )
+    apple_returns_figure.show()
 
 
 if __name__ == "__main__":
