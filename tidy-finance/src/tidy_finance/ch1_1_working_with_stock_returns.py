@@ -101,6 +101,42 @@ def run():
     )
     apple_returns_figure.show()
 
+    trading_volume = (
+        prices_daily.assign(
+            trading_volume=lambda x: (x["volume"] * x["adjusted_close"]) / 1e9
+        )  # Convert to billion USD
+        .groupby("date")["trading_volume"]  # Aggregate trading volume by date
+        .sum()  # Sum trading volumes across all symbols
+        .reset_index()  # Reset index to turn Series back into DataFrame
+        .assign(trading_volume_lag=lambda x: x["trading_volume"].shift(periods=1))
+        .dropna(subset=["trading_volume_lag"])  # drop row(s) with missing values
+        # Add column for lagged trading volume(yesterday's volume) for comparison
+    )
+
+    trading_volume_figure = (
+        ggplot(trading_volume, aes(x="date", y="trading_volume"))
+        + geom_line()
+        + scale_x_datetime(date_breaks="5 years", date_labels="%Y")
+        + labs(
+            x="",
+            y="",
+            title="Aggregate daily trading volume of DOW index constituents in billion USD",
+        )
+    )
+    trading_volume_figure.show()
+
+    persistence_figure = (
+        ggplot(trading_volume, aes(x="trading_volume_lag", y="trading_volume"))
+        + geom_point()
+        + geom_abline(aes(intercept=0, slope=1), linetype="dashed")
+        + labs(
+            x="Previous day aggregate trading volume",
+            y="Aggregate trading volume",
+            title="Persistence in daily trading volume of DOW constituents in billion USD",
+        )
+    )
+    persistence_figure.show()
+
 
 if __name__ == "__main__":
     run()
