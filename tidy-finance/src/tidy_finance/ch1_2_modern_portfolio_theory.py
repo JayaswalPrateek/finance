@@ -109,6 +109,42 @@ def run() -> None:
     )
     sigma_figure.show()
 
+    # sigma being the variance-covariance matrix
+    iota = np.ones(sigma.shape[0])  # Nx1 vector of ones
+    sigma_inv = np.linalg.inv(sigma.values)  # NxN
+    omega_mvp = (sigma_inv @ iota) / (iota @ sigma_inv @ iota)
+    # numerator: NxN @ Nx1 = Nx1 vector
+    # denominator: 1xN @ NxN @ Nx1 = 1x1 scalar
+    # numerator / denominator = Nx1 vector
+    # This gives the minimum-variance portfolio weights
+
+    assets = assets.assign(omega_mvp=omega_mvp)
+
+    assets["symbol"] = pd.Categorical(
+        assets["symbol"],
+        categories=assets.sort_values("omega_mvp")["symbol"],
+        ordered=True,
+    )  # For better visualization: order by omega_mvp
+    print(assets)
+
+    omega_figure = (
+        ggplot(assets, aes(y="omega_mvp", x="symbol", fill="omega_mvp>0"))
+        + geom_col()  # position is symbol and height is omega_mvp
+        + coord_flip()
+        + scale_y_continuous(labels=percent_format())
+        + labs(x="", y="", title="Minimum-variance portfolio weights")
+        + theme(legend_position="none")
+    )
+    omega_figure.show()
+
+    mu = assets["mu"].values
+    mu_mvp = omega_mvp @ mu
+    sigma_mvp = np.sqrt(omega_mvp @ sigma.values @ omega_mvp)
+    summary_mvp = pd.DataFrame(
+        {"mu": [mu_mvp], "sigma": [sigma_mvp], "type": ["Minimum-Variance Portfolio"]}
+    )
+    print(summary_mvp)
+
 
 if __name__ == "__main__":
     run()
