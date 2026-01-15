@@ -7,6 +7,7 @@ name = "tidy-finance"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
+    "adjusttext>=1.3.0",
     "ipykernel>=7.1.0",
     "jupyterlab>=4.5.1",
     "numpy>=2.4.0",
@@ -23,3 +24,4 @@ where = ["src"]
 
 [project.scripts]
 chapter1_1 = "tidy_finance.ch1_1_working_with_stock_returns:run"
+chapter1_2 = "tidy_finance.ch1_2_modern_portfolio_theory:run"
