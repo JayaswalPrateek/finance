@@ -145,6 +145,37 @@ def run() -> None:
     )
     print(summary_mvp)
 
+    # Efficient Portfolio
+    mu_bar = assets["mu"].max()
+    C = iota @ sigma_inv @ iota
+    D = iota @ sigma_inv @ mu
+    E = mu @ sigma_inv @ mu
+    lambda_tilde = 2 * (mu_bar - D / C) / (E - (D**2) / C)
+    omega_efp = omega_mvp + (lambda_tilde / 2) * (sigma_inv @ mu - D * omega_mvp)
+    mu_efp = omega_efp @ mu
+    sigma_efp = np.sqrt(omega_efp @ sigma.values @ omega_efp)
+
+    summary_efp = pd.DataFrame(
+        {"mu": [mu_efp], "sigma": [sigma_efp], "type": ["Efficient Portfolio"]}
+    )
+
+    summaries = pd.concat([assets, summary_mvp, summary_efp], ignore_index=True)
+
+    summaries_figure = (
+        ggplot(summaries, aes(x="sigma", y="mu"))
+        + geom_point(data=summaries.query("type.isna()"))
+        + geom_point(data=summaries.query("type.notna()"), color="#F21A00", size=3)
+        + geom_label(aes(label="type"), adjust_text={"arrowprops": {"arrowstyle": "-"}})
+        + scale_x_continuous(labels=percent_format())
+        + scale_y_continuous(labels=percent_format())
+        + labs(
+            x="Volatility",
+            y="Expected return",
+            title="Efficient & minimum-variance portfolios",
+        )
+    )
+    summaries_figure.show()
+
 
 if __name__ == "__main__":
     run()
