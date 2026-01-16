@@ -176,6 +176,34 @@ def run() -> None:
     )
     summaries_figure.show()
 
+    efficient_frontier = (
+        pd.DataFrame({"a": np.arange(-1, 2.01, 0.01)})
+        .assign(
+            omega=lambda x: x["a"].map(lambda x: x * omega_efp + (1 - x) * omega_mvp)
+        )
+        .assign(
+            mu=lambda x: x["omega"].map(lambda x: x @ mu),
+            sigma=lambda x: x["omega"].map(lambda x: np.sqrt(x @ sigma @ x)),
+        )
+    )
+
+    summaries = pd.concat([summaries, efficient_frontier], ignore_index=True)
+
+    summaries_figure = (
+        ggplot(summaries, aes(x="sigma", y="mu"))
+        + geom_point(data=summaries.query("type.isna()"))
+        + geom_point(data=summaries.query("type.notna()"), color="#F21A00", size=3)
+        + geom_label(aes(label="type"), adjust_text={"arrowprops": {"arrowstyle": "-"}})
+        + scale_x_continuous(labels=percent_format())
+        + scale_y_continuous(labels=percent_format())
+        + labs(
+            x="Volatility",
+            y="Expected return",
+            title="Efficient & minimum-variance portfolios",
+        )
+    )
+    summaries_figure.show()
+
 
 if __name__ == "__main__":
     run()
