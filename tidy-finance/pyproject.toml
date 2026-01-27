@@ -12,6 +12,7 @@ dependencies = [
     "jupyterlab>=4.5.1",
     "numpy>=2.4.0",
     "pandas>=2.3.3",
+    "pandas-datareader>=0.10.0",
     "plotnine>=0.15.2",
     "tidyfinance>=0.2.5",
 ]
@@ -25,3 +26,4 @@ where = ["src"]
 [project.scripts]
 chapter1_1 = "tidy_finance.ch1_1_working_with_stock_returns:run"
 chapter1_2 = "tidy_finance.ch1_2_modern_portfolio_theory:run"
+chapter1_3 = "tidy_finance.ch1_3_capital_asset_pricing_model:run"
